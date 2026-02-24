@@ -3,11 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ArrowDown,
-  ArrowRight,
   ChevronRight,
   Layers,
-  Zap,
   AlertTriangle,
 } from "lucide-react";
 import { supplyChainLayers } from "@/data/supplyChain";
@@ -262,6 +259,100 @@ const layerLabels = [
   "End Products",
 ];
 
+// Animated connector between layers
+function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; toColor: string; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: delay * 0.1, duration: 0.5 }}
+      className="relative flex items-center justify-center my-1 py-2"
+    >
+      {/* Central animated line */}
+      <div className="absolute inset-x-4 flex items-center justify-center">
+        <svg width="100%" height="32" className="overflow-visible">
+          {/* Horizontal grid line */}
+          <line
+            x1="10%"
+            y1="16"
+            x2="90%"
+            y2="16"
+            stroke={`${fromColor}30`}
+            strokeWidth="1"
+          />
+          {/* Center vertical pulse line */}
+          <line
+            x1="50%"
+            y1="0"
+            x2="50%"
+            y2="32"
+            className="supply-grid-line"
+            stroke="url(#connectorGradient)"
+            strokeWidth="2"
+          />
+          {/* Left branch */}
+          <line
+            x1="20%"
+            y1="4"
+            x2="50%"
+            y2="16"
+            className="supply-grid-line"
+            stroke={`${fromColor}40`}
+            strokeWidth="1"
+            style={{ animationDelay: "0.3s" }}
+          />
+          {/* Right branch */}
+          <line
+            x1="80%"
+            y1="4"
+            x2="50%"
+            y2="16"
+            className="supply-grid-line"
+            stroke={`${fromColor}40`}
+            strokeWidth="1"
+            style={{ animationDelay: "0.6s" }}
+          />
+          {/* Left exit */}
+          <line
+            x1="50%"
+            y1="16"
+            x2="25%"
+            y2="28"
+            className="supply-grid-line"
+            stroke={`${toColor}40`}
+            strokeWidth="1"
+            style={{ animationDelay: "0.9s" }}
+          />
+          {/* Right exit */}
+          <line
+            x1="50%"
+            y1="16"
+            x2="75%"
+            y2="28"
+            className="supply-grid-line"
+            stroke={`${toColor}40`}
+            strokeWidth="1"
+            style={{ animationDelay: "1.2s" }}
+          />
+          {/* Node dots */}
+          <circle cx="50%" cy="16" r="3" fill={fromColor} opacity="0.7">
+            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite" />
+            <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" />
+          </circle>
+          {/* Gradient definition */}
+          <defs>
+            <linearGradient id="connectorGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={fromColor} stopOpacity="0.6" />
+              <stop offset="50%" stopColor="#3B82F6" stopOpacity="0.8" />
+              <stop offset="100%" stopColor={toColor} stopOpacity="0.6" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function SupplyChainView() {
   const [expandedNode, setExpandedNode] = useState<string | null>(null);
 
@@ -279,40 +370,57 @@ export default function SupplyChainView() {
       </div>
 
       {/* Flow Diagram */}
-      <div className="space-y-2">
+      <div className="space-y-0">
         {flowData.map((layer, layerIdx) => (
           <div key={layerIdx}>
             {/* Layer Label */}
-            <div className="flex items-center gap-3 mb-3">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: layerIdx * 0.08 }}
+              className="flex items-center gap-3 mb-3"
+            >
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white supply-node-active"
                 style={{ backgroundColor: supplyChainLayers[layerIdx]?.color || "#6366F1" }}
               >
                 {layerIdx + 1}
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="text-sm font-semibold text-white">{layerLabels[layerIdx]}</h3>
                 <p className="text-[10px] text-slate-500">{supplyChainLayers[layerIdx]?.description}</p>
               </div>
-            </div>
+              {/* Horizontal energy line extending from label */}
+              <div className="flex-1 h-[1px] supply-connection-h opacity-40" />
+            </motion.div>
 
             {/* Layer Nodes */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 ml-11">
-              {layer.map((node) => {
+              {layer.map((node, nodeIdx) => {
                 const isExpanded = expandedNode === node.id;
                 return (
                   <motion.div
                     key={node.id}
                     layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: layerIdx * 0.08 + nodeIdx * 0.04 }}
                     onClick={() => setExpandedNode(isExpanded ? null : node.id)}
-                    className="bg-surface rounded-xl border border-border hover:border-slate-600 cursor-pointer transition-all overflow-hidden card-glow"
+                    className="rounded-xl border cursor-pointer transition-all overflow-hidden card-glow supply-node-active"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${node.color} 5%, #111827)`,
+                      borderColor: `${node.color}25`,
+                    }}
                   >
                     <div className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: node.color }}
+                            style={{
+                              backgroundColor: node.color,
+                              boxShadow: `0 0 6px ${node.color}60`,
+                            }}
                           />
                           <div>
                             <p className="text-sm font-semibold text-white">{node.label}</p>
@@ -349,7 +457,8 @@ export default function SupplyChainView() {
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
-                        className="border-t border-border px-3 pb-3"
+                        className="border-t px-3 pb-3"
+                        style={{ borderColor: `${node.color}20` }}
                       >
                         <div className="space-y-1.5 mt-2">
                           {node.items.map((item, i) => (
@@ -373,14 +482,13 @@ export default function SupplyChainView() {
               })}
             </div>
 
-            {/* Animated arrow between layers */}
+            {/* Animated grid connector between layers */}
             {layerIdx < flowData.length - 1 && (
-              <div className="flex justify-center my-3">
-                <div className="supply-arrow">
-                  <div className="supply-arrow-line" />
-                  <ArrowDown className="w-5 h-5 text-blue-400 supply-arrow-head" />
-                </div>
-              </div>
+              <LayerConnector
+                fromColor={supplyChainLayers[layerIdx]?.color || "#3B82F6"}
+                toColor={supplyChainLayers[layerIdx + 1]?.color || "#3B82F6"}
+                delay={layerIdx}
+              />
             )}
           </div>
         ))}

@@ -277,3 +277,88 @@ body {
   50% { opacity: 0.04; }
   100% { opacity: 0.02; }
 }
+
+/* ── Supply chain grid connection animations ───────────────────────── */
+@keyframes energy-flow-horizontal {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes energy-flow-vertical {
+  0% { background-position: 50% 0%; }
+  100% { background-position: 50% 200%; }
+}
+
+@keyframes connection-pulse {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 4px rgba(59, 130, 246, 0.2); }
+  50% { opacity: 0.8; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
+}
+
+@keyframes node-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 10px 2px rgba(59, 130, 246, 0.15); }
+}
+
+.supply-connection-h {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: energy-flow-horizontal 3s linear infinite;
+}
+
+.supply-connection-v {
+  width: 2px;
+  background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.4), transparent);
+  background-size: 100% 200%;
+  animation: energy-flow-vertical 2s linear infinite;
+}
+
+.supply-node-active {
+  animation: node-glow 3s ease-in-out infinite;
+}
+
+/* ── Animated grid connector between supply chain layers ───────────── */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -24; }
+}
+
+.supply-grid-line {
+  stroke-dasharray: 6 6;
+  animation: dash-flow 1.5s linear infinite;
+}
+
+/* ── Map animated route lines ──────────────────────────────────────── */
+@keyframes map-route-dash {
+  to { stroke-dashoffset: -30; }
+}
+
+.map-route-line {
+  stroke-dasharray: 10 8;
+  animation: map-route-dash 2s linear infinite;
+}
+
+@keyframes map-route-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.map-route-glow {
+  animation: map-route-pulse 3s ease-in-out infinite;
+}
+
+/* ── Company logo fallback ─────────────────────────────────────────── */
+.company-logo {
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.company-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}

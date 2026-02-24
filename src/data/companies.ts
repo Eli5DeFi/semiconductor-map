@@ -962,6 +962,16 @@ export const companies: Company[] = [
   },
 ];
 
+// ── Logo URL helper ─────────────────────────────────────────────────
+export function getCompanyLogoUrl(website: string): string {
+  try {
+    const domain = new URL(website).hostname.replace("www.", "");
+    return `https://logo.clearbit.com/${domain}`;
+  } catch {
+    return "";
+  }
+}
+
 export const categoryColors: Record<CompanyCategory, string> = {
   chip_designer: "#8B5CF6",
   memory_manufacturer: "#3B82F6",

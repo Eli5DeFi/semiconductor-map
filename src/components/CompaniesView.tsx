@@ -8,17 +8,56 @@ import {
   TrendingUp,
   TrendingDown,
   MapPin,
-  Filter,
   X,
-  Building2,
   DollarSign,
   Users,
   Calendar,
   Globe,
-  ChevronDown,
   BarChart3,
 } from "lucide-react";
-import { companies, categoryColors, categoryLabels, type CompanyCategory, type Company } from "@/data/companies";
+import { companies, categoryColors, categoryLabels, getCompanyLogoUrl, type CompanyCategory, type Company } from "@/data/companies";
+
+function CompanyLogo({ company, size = 32 }: { company: Company; size?: number }) {
+  const logoUrl = getCompanyLogoUrl(company.website);
+  const initials = company.name.charAt(0).toUpperCase();
+  return (
+    <div
+      className="flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: `${company.color}15`,
+        border: `1px solid ${company.color}30`,
+      }}
+    >
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={company.name}
+          width={size - 8}
+          height={size - 8}
+          className="company-logo"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+            (e.currentTarget.nextElementSibling as HTMLElement)!.style.display = "flex";
+          }}
+        />
+      ) : null}
+      <span
+        className="company-logo-fallback"
+        style={{
+          display: logoUrl ? "none" : "flex",
+          width: size,
+          height: size,
+          color: company.color,
+          fontSize: size * 0.45,
+        }}
+      >
+        {initials}
+      </span>
+    </div>
+  );
+}
 
 export default function CompaniesView() {
   const [search, setSearch] = useState("");
@@ -150,13 +189,19 @@ export default function CompaniesView() {
                     key={company.id}
                     whileHover={{ y: -2 }}
                     onClick={() => setSelectedCompany(company)}
-                    className="text-left bg-surface rounded-xl border border-border hover:border-slate-600 p-4 transition-all card-glow"
+                    className="text-left rounded-xl border hover:border-slate-600 p-4 transition-all card-glow"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${categoryColors[company.category]} 6%, #111827)`,
+                      borderColor: `${categoryColors[company.category]}20`,
+                    }}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5 flex-1">
+                        <CompanyLogo company={company} size={36} />
+                        <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-semibold text-white line-clamp-1">{company.name}</h4>
                         </div>
+                      </div>
                         <div className="flex items-center gap-2 mt-1">
                           {company.ticker && (
                             <span className="text-[10px] font-mono bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded">
@@ -166,11 +211,6 @@ export default function CompaniesView() {
                           <span className="text-[10px] text-slate-500">{company.subcategory}</span>
                         </div>
                       </div>
-                      <span
-                        className="w-3 h-3 rounded-full flex-shrink-0 mt-1"
-                        style={{ backgroundColor: categoryColors[company.category] }}
-                      />
-                    </div>
                     {company.stock && (
                       <div className="flex items-center gap-2 mb-2 py-1.5 px-2 rounded-lg bg-surface-2 border border-border">
                         <span className="text-sm font-bold text-white font-mono">
@@ -234,7 +274,7 @@ export default function CompaniesView() {
 
               {/* Header */}
               <div className="mb-5">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <span
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: categoryColors[selectedCompany.category] }}
@@ -243,8 +283,13 @@ export default function CompaniesView() {
                     {categoryLabels[selectedCompany.category]}
                   </span>
                 </div>
-                <h2 className="text-xl font-bold text-white">{selectedCompany.name}</h2>
-                <p className="text-sm text-slate-400 mt-1">{selectedCompany.subcategory}</p>
+                <div className="flex items-center gap-3">
+                  <CompanyLogo company={selectedCompany} size={48} />
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{selectedCompany.name}</h2>
+                    <p className="text-sm text-slate-400 mt-0.5">{selectedCompany.subcategory}</p>
+                  </div>
+                </div>
               </div>
 
               {/* Quick Stats */}

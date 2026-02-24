@@ -203,33 +203,58 @@ function CustomTooltip({
 const RADIAN = Math.PI / 180;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function renderLabel(props: any) {
-  const { cx, cy, midAngle, outerRadius, name, value } = props as {
+  const { cx, cy, midAngle, innerRadius, outerRadius, name, value } = props as {
     cx: number;
     cy: number;
     midAngle: number;
+    innerRadius: number;
     outerRadius: number;
     name: string;
     value: number;
   };
-  const radius = outerRadius + 20;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-  // Only show labels for segments >= 8%
-  if (value < 8) return null;
+  // Show label inside the segment for large segments
+  if (value >= 20) {
+    const midRadius = (innerRadius + outerRadius) / 2;
+    const x = cx + midRadius * Math.cos(-midAngle * RADIAN);
+    const y = cy + midRadius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#FFFFFF"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontWeight="700"
+        fontSize="13"
+        style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+      >
+        {value}%
+      </text>
+    );
+  }
 
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="#CBD5E1"
-      textAnchor={x > cx ? "start" : "end"}
-      dominantBaseline="central"
-      className="text-[11px]"
-    >
-      {name} {value}%
-    </text>
-  );
+  // External label for medium segments (10-19%)
+  if (value >= 10) {
+    const radius = outerRadius + 16;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#F1F5F9"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontWeight="600"
+        fontSize="12"
+      >
+        {value}%
+      </text>
+    );
+  }
+
+  return null;
 }
 
 // ── Single chart card ───────────────────────────────────────────────

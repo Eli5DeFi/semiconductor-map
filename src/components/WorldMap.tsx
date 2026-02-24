@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, useMap } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -32,6 +33,73 @@ import {
   type MaterialCategory,
   type RawMaterial,
 } from "@/data/materials";
+
+// ---------------------------------------------------------------------------
+// Supply chain route definitions
+// ---------------------------------------------------------------------------
+
+interface SupplyRoute {
+  from: string;
+  to: string;
+  color: string;
+  label: string;
+  category: "equipment" | "design" | "materials" | "memory" | "packaging" | "eda";
+}
+
+const supplyChainRoutes: SupplyRoute[] = [
+  // Equipment → Foundries
+  { from: "asml", to: "tsmc", color: "#F59E0B", label: "EUV Equipment", category: "equipment" },
+  { from: "asml", to: "samsung_memory", color: "#F59E0B", label: "EUV Equipment", category: "equipment" },
+  { from: "asml", to: "intel", color: "#F59E0B", label: "EUV Equipment", category: "equipment" },
+  { from: "applied_materials", to: "tsmc", color: "#F59E0B", label: "WFE", category: "equipment" },
+  { from: "tokyo_electron", to: "tsmc", color: "#F59E0B", label: "WFE", category: "equipment" },
+  { from: "lam_research", to: "tsmc", color: "#F59E0B", label: "Etch Equipment", category: "equipment" },
+  // EUV Optics chain
+  { from: "zeiss", to: "asml", color: "#F59E0B", label: "EUV Optics", category: "equipment" },
+  // Chip Designers → Foundry
+  { from: "nvidia", to: "tsmc", color: "#8B5CF6", label: "Chip Fab", category: "design" },
+  { from: "amd", to: "tsmc", color: "#8B5CF6", label: "Chip Fab", category: "design" },
+  { from: "apple", to: "tsmc", color: "#8B5CF6", label: "Chip Fab", category: "design" },
+  { from: "qualcomm", to: "tsmc", color: "#8B5CF6", label: "Chip Fab", category: "design" },
+  { from: "broadcom", to: "tsmc", color: "#8B5CF6", label: "Chip Fab", category: "design" },
+  // Wafer Materials → Foundry
+  { from: "shin_etsu", to: "tsmc", color: "#10B981", label: "Wafers", category: "materials" },
+  { from: "sumco", to: "tsmc", color: "#10B981", label: "Wafers", category: "materials" },
+  { from: "shin_etsu", to: "samsung_memory", color: "#10B981", label: "Wafers", category: "materials" },
+  // Memory → AI (HBM supply chain)
+  { from: "sk_hynix", to: "nvidia", color: "#3B82F6", label: "HBM for AI", category: "memory" },
+  { from: "micron", to: "nvidia", color: "#3B82F6", label: "HBM for AI", category: "memory" },
+  { from: "sk_hynix", to: "tsmc", color: "#06B6D4", label: "HBM CoWoS", category: "packaging" },
+  // Foundry → OSAT
+  { from: "tsmc", to: "ase", color: "#06B6D4", label: "Packaging", category: "packaging" },
+  { from: "tsmc", to: "amkor", color: "#06B6D4", label: "Packaging", category: "packaging" },
+  // EDA → Designers
+  { from: "synopsys", to: "nvidia", color: "#EC4899", label: "EDA Tools", category: "eda" },
+  { from: "cadence", to: "amd", color: "#EC4899", label: "EDA Tools", category: "eda" },
+  { from: "arm", to: "apple", color: "#EC4899", label: "ARM IP", category: "eda" },
+  { from: "arm", to: "qualcomm", color: "#EC4899", label: "ARM IP", category: "eda" },
+];
+
+const routeCategoryLabels: Record<string, string> = {
+  equipment: "Equipment Supply",
+  design: "Design → Foundry",
+  materials: "Materials Supply",
+  memory: "Memory/HBM Supply",
+  packaging: "Packaging",
+  eda: "EDA & IP",
+};
+
+const routeCategoryColors: Record<string, string> = {
+  equipment: "#F59E0B",
+  design: "#8B5CF6",
+  materials: "#10B981",
+  memory: "#3B82F6",
+  packaging: "#06B6D4",
+  eda: "#EC4899",
+};
+
+// Build a company lookup map for quick coordinate access
+const companyMap = new Map(companies.map((c) => [c.id, c]));
 
 // ---------------------------------------------------------------------------
 // Types
@@ -260,6 +328,7 @@ export default function WorldMap() {
   const [showFacilities, setShowFacilities] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
+  const [showRoutes, setShowRoutes] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -509,17 +578,32 @@ export default function WorldMap() {
 
         {/* Facilities toggle (companies only) */}
         {viewMode === "companies" && (
-          <button
-            onClick={() => setShowFacilities((p) => !p)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all border flex-shrink-0 ${
-              showFacilities
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-border text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <Factory className="w-3.5 h-3.5" />
-            Facilities
-          </button>
+          <>
+            <button
+              onClick={() => setShowRoutes((p) => !p)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all border flex-shrink-0 ${
+                showRoutes
+                  ? "border-purple-500/30 bg-purple-500/10 text-purple-400"
+                  : "border-border text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 20 L12 4 L20 20" strokeDasharray="4 3" />
+              </svg>
+              Routes
+            </button>
+            <button
+              onClick={() => setShowFacilities((p) => !p)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all border flex-shrink-0 ${
+                showFacilities
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : "border-border text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Factory className="w-3.5 h-3.5" />
+              Facilities
+            </button>
+          </>
         )}
 
         {/* Stats */}
@@ -536,6 +620,12 @@ export default function WorldMap() {
                     0,
                   )}{" "}
                   facilities
+                </>
+              )}
+              {showRoutes && (
+                <>
+                  {" "}&middot;{" "}
+                  {supplyChainRoutes.length} routes
                 </>
               )}
             </span>
@@ -645,10 +735,47 @@ export default function WorldMap() {
                 );
               }),
             )}
+
+          {/* ========== SUPPLY CHAIN ROUTES ========== */}
+          {showRoutes && viewMode === "companies" &&
+            supplyChainRoutes.map((route, idx) => {
+              const fromCompany = companyMap.get(route.from);
+              const toCompany = companyMap.get(route.to);
+              if (!fromCompany || !toCompany) return null;
+              const positions: LatLngExpression[] = [
+                [fromCompany.lat, fromCompany.lng],
+                [toCompany.lat, toCompany.lng],
+              ];
+              return (
+                <Polyline
+                  key={`route-${idx}`}
+                  positions={positions}
+                  pathOptions={{
+                    color: route.color,
+                    weight: 2,
+                    opacity: 0.5,
+                    dashArray: "8 6",
+                    className: "map-route-line",
+                  }}
+                >
+                  <Popup>
+                    <div className="min-w-[160px]">
+                      <p className="text-xs font-bold text-white mb-1">{route.label}</p>
+                      <p className="text-[11px] text-slate-300">
+                        {fromCompany.name} → {toCompany.name}
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {routeCategoryLabels[route.category]}
+                      </p>
+                    </div>
+                  </Popup>
+                </Polyline>
+              );
+            })}
         </MapContainer>
 
         {/* ---- Floating legend ---- */}
-        <Legend viewMode={viewMode} />
+        <Legend viewMode={viewMode} showRoutes={showRoutes} />
       </div>
     </div>
   );
@@ -658,7 +785,7 @@ export default function WorldMap() {
 // Legend overlay
 // ---------------------------------------------------------------------------
 
-function Legend({ viewMode }: { viewMode: ViewMode }) {
+function Legend({ viewMode, showRoutes }: { viewMode: ViewMode; showRoutes: boolean }) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -713,6 +840,24 @@ function Legend({ viewMode }: { viewMode: ViewMode }) {
                     <span className="text-[11px] text-slate-400">= Facility (smaller)</span>
                   </div>
                 </div>
+                {showRoutes && (
+                  <div className="border-t border-white/5 pt-1.5 mt-1.5 space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">
+                      Supply Routes
+                    </p>
+                    {Object.entries(routeCategoryColors).map(([cat, color]) => (
+                      <div key={cat} className="flex items-center gap-2">
+                        <span
+                          className="w-5 h-0 border-t-2 border-dashed flex-shrink-0"
+                          style={{ borderColor: color }}
+                        />
+                        <span className="text-[11px] text-slate-300">
+                          {routeCategoryLabels[cat]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-1.5">
