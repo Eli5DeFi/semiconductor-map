@@ -2,6 +2,8 @@
 
 Interactive dashboard mapping the global semiconductor supply chain — from raw materials to end products. Visualize geographic concentrations, market shares, risk scenarios, and cascading disruption impacts across the entire chip ecosystem.
 
+**[Live Demo →](https://semiconductor-map.vercel.app/)**
+
 ![Dashboard Overview](public/screenshot.png)
 
 ## Features
