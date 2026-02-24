@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Semiconductor Supply Chain Intelligence
+
+Interactive dashboard mapping the global semiconductor supply chain — from raw materials to end products. Visualize geographic concentrations, market shares, risk scenarios, and cascading disruption impacts across the entire chip ecosystem.
+
+![Dashboard Overview](public/screenshot.png)
+
+## Features
+
+- **Interactive World Map** — Leaflet-powered map with company HQs, fab locations, material sources, and trade routes. Search and fly-to any entity.
+- **Supply Chain Flow** — Animated layer-by-layer visualization from raw materials → wafer fab → packaging → integration → end products.
+- **Company Directory** — 38 tracked companies with financials, market caps, stock prices, employee counts, and segment breakdowns.
+- **Market Share Analysis** — Pie/donut charts across GPU, DRAM, NAND, CPU, HDD, EDA, foundry, equipment, and more.
+- **Risk Assessment** — Disruption scenarios (Taiwan, China export bans, HBM shortage, EUV), cascade timelines, geographic risk matrix.
+- **Product Deep Dives** — GPU/AI, DRAM, NAND Flash, CPU, and HDD supply chains with bottleneck analysis.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **Maps**: Leaflet + react-leaflet
+- **Charts**: Recharts
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deploy instantly on [Vercel](https://vercel.com):
 
-## Learn More
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Eli5DeFi/semiconductor-map)
 
-To learn more about Next.js, take a look at the following resources:
+## Author
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built by [eli5defi](https://x.com/Eli5defi)
