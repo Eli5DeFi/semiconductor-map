@@ -15,11 +15,10 @@ import {
   Globe,
   BarChart3,
 } from "lucide-react";
-import { companies, categoryColors, categoryLabels, getCompanyLogoUrl, type CompanyCategory, type Company } from "@/data/companies";
+import { companies, categoryColors, categoryLabels, getCompanyLogoPath, type CompanyCategory, type Company } from "@/data/companies";
 
 function CompanyLogo({ company, size = 32 }: { company: Company; size?: number }) {
-  const logoUrl = getCompanyLogoUrl(company.website);
-  const initials = company.name.charAt(0).toUpperCase();
+  const logoPath = getCompanyLogoPath(company.id);
   return (
     <div
       className="flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
@@ -30,31 +29,13 @@ function CompanyLogo({ company, size = 32 }: { company: Company; size?: number }
         border: `1px solid ${company.color}30`,
       }}
     >
-      {logoUrl ? (
-        <img
-          src={logoUrl}
-          alt={company.name}
-          width={size - 8}
-          height={size - 8}
-          className="company-logo"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-            (e.currentTarget.nextElementSibling as HTMLElement)!.style.display = "flex";
-          }}
-        />
-      ) : null}
-      <span
-        className="company-logo-fallback"
-        style={{
-          display: logoUrl ? "none" : "flex",
-          width: size,
-          height: size,
-          color: company.color,
-          fontSize: size * 0.45,
-        }}
-      >
-        {initials}
-      </span>
+      <img
+        src={logoPath}
+        alt={company.name}
+        width={size - 4}
+        height={size - 4}
+        className="company-logo"
+      />
     </div>
   );
 }
@@ -208,7 +189,7 @@ export default function CompaniesView() {
                               {company.ticker}
                             </span>
                           )}
-                          <span className="text-[10px] text-slate-500">{company.subcategory}</span>
+                          <span className="text-[10px] text-slate-400">{company.subcategory}</span>
                         </div>
                       </div>
                     {company.stock && (

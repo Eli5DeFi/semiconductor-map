@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+/* ── Theme: Dark (default) ─────────────────────────────────────────── */
 @theme inline {
   --color-background: #0a0b14;
-  --color-foreground: #e2e8f0;
+  --color-foreground: #f1f5f9;
   --color-surface: #111827;
   --color-surface-2: #1e293b;
   --color-border: #1e293b;
@@ -16,6 +17,72 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ── Theme Overrides ───────────────────────────────────────────────── */
+[data-theme="midnight"] {
+  --color-background: #060d1f;
+  --color-foreground: #f1f5f9;
+  --color-surface: #0f1a33;
+  --color-surface-2: #162040;
+  --color-border: #1e2d52;
+  --color-accent: #6366f1;
+  --color-accent-2: #a78bfa;
+}
+
+[data-theme="cyberpunk"] {
+  --color-background: #0a0a0f;
+  --color-foreground: #e0ffe0;
+  --color-surface: #0f0f18;
+  --color-surface-2: #16162a;
+  --color-border: #1f1f3a;
+  --color-accent: #00ff88;
+  --color-accent-2: #ff00ff;
+}
+
+[data-theme="light"] {
+  --color-background: #f0f4f8;
+  --color-foreground: #0f172a;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-accent: #2563eb;
+  --color-accent-2: #7c3aed;
+}
+
+/* ── Light theme text overrides ────────────────────────────────────── */
+[data-theme="light"] .text-white { color: #0f172a !important; }
+[data-theme="light"] .text-slate-200 { color: #334155 !important; }
+[data-theme="light"] .text-slate-300 { color: #475569 !important; }
+[data-theme="light"] .text-slate-400 { color: #64748b !important; }
+[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
+[data-theme="light"] .text-blue-400 { color: #2563eb !important; }
+[data-theme="light"] .text-emerald-400 { color: #059669 !important; }
+[data-theme="light"] .text-red-400 { color: #dc2626 !important; }
+[data-theme="light"] .text-amber-400 { color: #d97706 !important; }
+[data-theme="light"] .text-purple-400 { color: #7c3aed !important; }
+[data-theme="light"] .text-cyan-400 { color: #0891b2 !important; }
+[data-theme="light"] .text-pink-400 { color: #db2777 !important; }
+[data-theme="light"] .border-border { border-color: #e2e8f0 !important; }
+[data-theme="light"] .bg-surface { background-color: #ffffff !important; }
+[data-theme="light"] .bg-surface-2 { background-color: #f1f5f9 !important; }
+[data-theme="light"] .bg-background { background-color: #f0f4f8 !important; }
+[data-theme="light"] .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.1) !important; }
+[data-theme="light"] .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.04) !important; }
+
+/* Light theme surface overrides */
+[data-theme="light"] .bg-red-500\/5 { background-color: rgba(239, 68, 68, 0.06) !important; }
+
+/* Cyberpunk theme accent overrides */
+[data-theme="cyberpunk"] .text-blue-400 { color: #00ff88 !important; }
+[data-theme="cyberpunk"] .text-blue-300 { color: #00ffaa !important; }
+[data-theme="cyberpunk"] .bg-blue-500\/10 { background-color: rgba(0, 255, 136, 0.1) !important; }
+[data-theme="cyberpunk"] .bg-blue-500 { background-color: #00ff88 !important; color: #000 !important; }
+
+/* Midnight theme accent */
+[data-theme="midnight"] .text-blue-400 { color: #818cf8 !important; }
+[data-theme="midnight"] .bg-blue-500\/10 { background-color: rgba(99, 102, 241, 0.1) !important; }
+[data-theme="midnight"] .bg-blue-500 { background-color: #6366f1 !important; }
+
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
   scrollbar-color: #334155 transparent;
@@ -35,6 +102,13 @@
   border-radius: 3px;
 }
 
+[data-theme="light"] * {
+  scrollbar-color: #cbd5e1 transparent;
+}
+[data-theme="light"] *::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
@@ -42,23 +116,27 @@ body {
   overflow: hidden;
 }
 
-/* Leaflet overrides for dark theme */
+/* ── Leaflet overrides for dark theme ──────────────────────────────── */
 .leaflet-container {
   background: #0f172a !important;
   font-family: inherit !important;
 }
 
+[data-theme="light"] .leaflet-container {
+  background: #e2e8f0 !important;
+}
+
 .leaflet-popup-content-wrapper {
-  background: #1e293b !important;
-  color: #e2e8f0 !important;
+  background: var(--color-surface-2) !important;
+  color: var(--color-foreground) !important;
   border-radius: 12px !important;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-  border: 1px solid #334155 !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .leaflet-popup-tip {
-  background: #1e293b !important;
-  border: 1px solid #334155 !important;
+  background: var(--color-surface-2) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .leaflet-popup-content {
@@ -72,9 +150,9 @@ body {
 }
 
 .leaflet-control-zoom a {
-  background: #1e293b !important;
-  color: #e2e8f0 !important;
-  border-color: #334155 !important;
+  background: var(--color-surface-2) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
 }
 
 .leaflet-control-zoom a:hover {
@@ -88,10 +166,10 @@ body {
 }
 
 .leaflet-control-attribution a {
-  color: #3b82f6 !important;
+  color: var(--color-accent) !important;
 }
 
-/* Custom marker pulse animation */
+/* ── Custom marker pulse animation ─────────────────────────────────── */
 @keyframes marker-pulse {
   0% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.5); opacity: 0.3; }
@@ -102,7 +180,7 @@ body {
   animation: marker-pulse 2s ease-in-out infinite;
 }
 
-/* Glass effect */
+/* ── Glass effect ──────────────────────────────────────────────────── */
 .glass {
   background: rgba(17, 24, 39, 0.7);
   backdrop-filter: blur(12px);
@@ -110,15 +188,20 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Gradient text */
+[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ── Gradient text ─────────────────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2), #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Flow line animation */
+/* ── Flow line animation ───────────────────────────────────────────── */
 @keyframes flow-dash {
   to { stroke-dashoffset: -20; }
 }
@@ -127,14 +210,14 @@ body {
   animation: flow-dash 1s linear infinite;
 }
 
-/* Glow effects */
+/* ── Glow effects ──────────────────────────────────────────────────── */
 .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
 .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
 .glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
 .glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
 .glow-purple { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
 
-/* Stat card hover */
+/* ── Stat card hover ───────────────────────────────────────────────── */
 .stat-card {
   transition: all 0.3s ease;
 }
@@ -143,13 +226,13 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Risk level badges */
+/* ── Risk level badges ─────────────────────────────────────────────── */
 .risk-critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 .risk-high { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
 .risk-medium { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
 .risk-low { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
 
-/* ── Card hover glow effect ──────────────────────────────────────────── */
+/* ── Card hover glow effect ────────────────────────────────────────── */
 .card-glow {
   position: relative;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -196,7 +279,7 @@ body {
   border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
-/* ── High contrast icons ─────────────────────────────────────────────── */
+/* ── High contrast icons ───────────────────────────────────────────── */
 .icon-high-contrast {
   filter: brightness(1.3) saturate(1.2);
   transition: filter 0.3s ease;
@@ -206,51 +289,11 @@ body {
   filter: brightness(1.5) saturate(1.4) drop-shadow(0 0 6px currentColor);
 }
 
-/* Increase lucide icon visibility globally */
 .lucide {
   filter: brightness(1.15);
 }
 
-/* ── Animated supply chain arrows ────────────────────────────────────── */
-@keyframes flow-pulse {
-  0%, 100% { opacity: 0.4; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(2px); }
-}
-
-@keyframes flow-energy {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 0% 200%; }
-}
-
-.supply-arrow {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-.supply-arrow-line {
-  width: 2px;
-  height: 24px;
-  background: linear-gradient(
-    180deg,
-    rgba(59, 130, 246, 0.8) 0%,
-    rgba(139, 92, 246, 0.6) 50%,
-    rgba(59, 130, 246, 0.8) 100%
-  );
-  background-size: 100% 200%;
-  animation: flow-energy 2s linear infinite;
-  border-radius: 1px;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.supply-arrow-head {
-  animation: flow-pulse 2s ease-in-out infinite;
-  filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6));
-}
-
-/* ── Pie chart hover enhancement ─────────────────────────────────────── */
+/* ── Pie chart hover enhancement ───────────────────────────────────── */
 .recharts-pie-sector {
   transition: all 0.3s ease !important;
   cursor: pointer;
@@ -261,42 +304,89 @@ body {
   transform-origin: center;
 }
 
-/* ── Footer attribution ──────────────────────────────────────────────── */
+/* ── Footer attribution ────────────────────────────────────────────── */
 .footer-link {
   transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-  color: #3b82f6;
+  color: var(--color-accent);
   text-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
 }
 
-/* ── Animated grid background subtle ─────────────────────────────────── */
-@keyframes grid-shimmer {
-  0% { opacity: 0.02; }
-  50% { opacity: 0.04; }
-  100% { opacity: 0.02; }
-}
-
-/* ── Supply chain grid connection animations ───────────────────────── */
-@keyframes energy-flow-horizontal {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-@keyframes energy-flow-vertical {
-  0% { background-position: 50% 0%; }
-  100% { background-position: 50% 200%; }
-}
-
-@keyframes connection-pulse {
-  0%, 100% { opacity: 0.3; box-shadow: 0 0 4px rgba(59, 130, 246, 0.2); }
-  50% { opacity: 0.8; box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
-}
-
+/* ── Supply chain node glow ────────────────────────────────────────── */
 @keyframes node-glow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
   50% { box-shadow: 0 0 10px 2px rgba(59, 130, 246, 0.15); }
+}
+
+.supply-node-active {
+  animation: node-glow 3s ease-in-out infinite;
+}
+
+/* ── Supply chain connector: smooth animated arrow ─────────────────── */
+@keyframes connector-flow {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 300%; }
+}
+
+@keyframes connector-particle {
+  0% { top: -4px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: calc(100% + 4px); opacity: 0; }
+}
+
+@keyframes connector-glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.connector-line {
+  position: relative;
+  width: 2px;
+  background: linear-gradient(180deg, var(--connector-from), var(--connector-to));
+  opacity: 0.4;
+}
+
+.connector-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 40%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.6) 60%,
+    transparent 100%
+  );
+  background-size: 100% 300%;
+  animation: connector-flow 2s linear infinite;
+}
+
+.connector-particle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: connector-particle 2s linear infinite;
+}
+
+.connector-arrowhead {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid;
+}
+
+/* ── Energy connection lines ───────────────────────────────────────── */
+@keyframes energy-flow-horizontal {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 
 .supply-connection-h {
@@ -306,18 +396,7 @@ body {
   animation: energy-flow-horizontal 3s linear infinite;
 }
 
-.supply-connection-v {
-  width: 2px;
-  background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.6), rgba(139, 92, 246, 0.4), transparent);
-  background-size: 100% 200%;
-  animation: energy-flow-vertical 2s linear infinite;
-}
-
-.supply-node-active {
-  animation: node-glow 3s ease-in-out infinite;
-}
-
-/* ── Animated grid connector between supply chain layers ───────────── */
+/* ── Animated grid connector (legacy SVG-based) ────────────────────── */
 @keyframes dash-flow {
   to { stroke-dashoffset: -24; }
 }
@@ -346,11 +425,9 @@ body {
   animation: map-route-pulse 3s ease-in-out infinite;
 }
 
-/* ── Company logo fallback ─────────────────────────────────────────── */
+/* ── Company logo ──────────────────────────────────────────────────── */
 .company-logo {
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
 }
 
 .company-logo-fallback {
@@ -361,4 +438,8 @@ body {
   font-size: 14px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .company-logo-fallback {
+  background: rgba(0, 0, 0, 0.05);
 }

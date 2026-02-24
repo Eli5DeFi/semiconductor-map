@@ -16,7 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Palette,
 } from "lucide-react";
+import { useTheme, themes } from "@/contexts/ThemeContext";
 
 export type ViewType =
   | "overview"
@@ -55,6 +57,8 @@ const productNav = [
 
 export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [showThemes, setShowThemes] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
     <motion.aside
@@ -186,6 +190,68 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
           })}
         </div>
       </nav>
+
+      {/* Theme Switcher */}
+      <div className="px-2 py-1.5 border-t border-border">
+        <button
+          onClick={() => setShowThemes(!showThemes)}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all"
+          title={collapsed ? "Theme" : undefined}
+        >
+          <Palette className="w-[18px] h-[18px] flex-shrink-0" />
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -5 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -5 }}
+                className="text-[13px] font-medium whitespace-nowrap"
+              >
+                Theme
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+        <AnimatePresence>
+          {showThemes && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className={`${collapsed ? "px-1" : "px-3"} pb-2 flex ${collapsed ? "flex-col" : "flex-row"} gap-1.5`}>
+                {themes.map((t) => (
+                  <button
+                    key={t.name}
+                    onClick={() => setTheme(t.name)}
+                    className={`group relative rounded-lg transition-all ${
+                      collapsed ? "w-full py-1.5" : "flex-1 py-2"
+                    } ${
+                      theme === t.name
+                        ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-transparent"
+                        : "hover:ring-1 hover:ring-slate-500"
+                    }`}
+                    title={t.label}
+                  >
+                    <div
+                      className="w-full h-5 rounded-md border border-white/10"
+                      style={{ background: t.preview }}
+                    />
+                    {!collapsed && (
+                      <p className={`text-[9px] mt-1 text-center font-medium ${
+                        theme === t.name ? "text-blue-400" : "text-slate-500"
+                      }`}>
+                        {t.label}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Built by eli5defi */}
       <AnimatePresence>

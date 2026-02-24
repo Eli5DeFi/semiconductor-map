@@ -259,95 +259,51 @@ const layerLabels = [
   "End Products",
 ];
 
-// Animated connector between layers
+// Smooth animated arrow connector between layers
 function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; toColor: string; delay?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: delay * 0.1, duration: 0.5 }}
-      className="relative flex items-center justify-center my-4 py-4"
+      className="relative flex items-center justify-center my-5 py-3"
     >
-      {/* Central animated line */}
-      <div className="absolute inset-x-4 flex items-center justify-center">
-        <svg width="100%" height="48" className="overflow-visible">
-          {/* Horizontal grid line */}
-          <line
-            x1="10%"
-            y1="24"
-            x2="90%"
-            y2="24"
-            stroke={`${fromColor}30`}
-            strokeWidth="1"
+      <div className="flex items-center justify-center w-full gap-4">
+        {/* Left decorative line */}
+        <div className="flex-1 h-[1px] opacity-20" style={{ background: `linear-gradient(90deg, transparent, ${fromColor})` }} />
+
+        {/* Center arrow group */}
+        <div className="flex flex-col items-center gap-0">
+          {/* Flowing line */}
+          <div
+            className="connector-line rounded-full"
+            style={{
+              height: 36,
+              ["--connector-from" as string]: fromColor,
+              ["--connector-to" as string]: toColor,
+            }}
+          >
+            {/* Animated particles */}
+            <div className="connector-particle" style={{ background: fromColor, animationDelay: "0s" }} />
+            <div className="connector-particle" style={{ background: toColor, animationDelay: "0.7s" }} />
+            <div className="connector-particle" style={{ background: "#fff", animationDelay: "1.4s", opacity: 0.6, width: 3, height: 3 }} />
+          </div>
+          {/* Arrowhead */}
+          <div className="connector-arrowhead" style={{ borderTopColor: toColor, opacity: 0.7 }} />
+          {/* Glow dot */}
+          <div
+            className="w-2 h-2 rounded-full mt-0.5"
+            style={{
+              background: toColor,
+              boxShadow: `0 0 8px ${toColor}80`,
+              animation: "connector-glow-pulse 2s ease-in-out infinite",
+              animationDelay: `${delay * 0.3}s`,
+            }}
           />
-          {/* Center vertical pulse line */}
-          <line
-            x1="50%"
-            y1="0"
-            x2="50%"
-            y2="48"
-            className="supply-grid-line"
-            stroke="url(#connectorGradient)"
-            strokeWidth="2"
-          />
-          {/* Left branch */}
-          <line
-            x1="20%"
-            y1="4"
-            x2="50%"
-            y2="24"
-            className="supply-grid-line"
-            stroke={`${fromColor}50`}
-            strokeWidth="1.5"
-            style={{ animationDelay: "0.3s" }}
-          />
-          {/* Right branch */}
-          <line
-            x1="80%"
-            y1="4"
-            x2="50%"
-            y2="24"
-            className="supply-grid-line"
-            stroke={`${fromColor}50`}
-            strokeWidth="1.5"
-            style={{ animationDelay: "0.6s" }}
-          />
-          {/* Left exit */}
-          <line
-            x1="50%"
-            y1="24"
-            x2="25%"
-            y2="44"
-            className="supply-grid-line"
-            stroke={`${toColor}50`}
-            strokeWidth="1.5"
-            style={{ animationDelay: "0.9s" }}
-          />
-          {/* Right exit */}
-          <line
-            x1="50%"
-            y1="24"
-            x2="75%"
-            y2="44"
-            className="supply-grid-line"
-            stroke={`${toColor}50`}
-            strokeWidth="1.5"
-            style={{ animationDelay: "1.2s" }}
-          />
-          {/* Node dots */}
-          <circle cx="50%" cy="24" r="4" fill={fromColor} opacity="0.7">
-            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite" />
-            <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
-          </circle>
-          {/* Gradient definition */}
-          <defs>
-            <linearGradient id="connectorGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={fromColor} stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#3B82F6" stopOpacity="0.8" />
-              <stop offset="100%" stopColor={toColor} stopOpacity="0.6" />
-            </linearGradient>
-          </defs>
-        </svg>
+        </div>
+
+        {/* Right decorative line */}
+        <div className="flex-1 h-[1px] opacity-20" style={{ background: `linear-gradient(90deg, ${toColor}, transparent)` }} />
       </div>
     </motion.div>
   );
@@ -364,7 +320,7 @@ export default function SupplyChainView() {
           <Layers className="w-5 h-5 text-blue-400 icon-high-contrast" />
           <h2 className="text-xl font-bold text-white">Supply Chain Flow</h2>
         </div>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-300">
           Interactive visualization of the complete semiconductor supply chain from raw material extraction to end products.
         </p>
       </div>
@@ -388,7 +344,7 @@ export default function SupplyChainView() {
               </div>
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-white">{layerLabels[layerIdx]}</h3>
-                <p className="text-[10px] text-slate-500">{supplyChainLayers[layerIdx]?.description}</p>
+                <p className="text-[10px] text-slate-400">{supplyChainLayers[layerIdx]?.description}</p>
               </div>
               {/* Horizontal energy line extending from label */}
               <div className="flex-1 h-[1px] supply-connection-h opacity-40" />
@@ -408,7 +364,7 @@ export default function SupplyChainView() {
                     onClick={() => setExpandedNode(isExpanded ? null : node.id)}
                     className="rounded-xl border cursor-pointer transition-all overflow-hidden card-glow supply-node-active"
                     style={{
-                      backgroundColor: `color-mix(in srgb, ${node.color} 5%, #111827)`,
+                      backgroundColor: `color-mix(in srgb, ${node.color} 5%, var(--color-surface))`,
                       borderColor: `${node.color}25`,
                     }}
                   >
@@ -425,28 +381,28 @@ export default function SupplyChainView() {
                           <div>
                             <p className="text-sm font-semibold text-white">{node.label}</p>
                             {node.sublabel && (
-                              <p className="text-[10px] text-slate-500">{node.sublabel}</p>
+                              <p className="text-[10px] text-slate-400">{node.sublabel}</p>
                             )}
                           </div>
                         </div>
                         <motion.div
                           animate={{ rotate: isExpanded ? 90 : 0 }}
                         >
-                          <ChevronRight className="w-4 h-4 text-slate-500" />
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
                         </motion.div>
                       </div>
 
-                      {/* Compact view - just show count */}
+                      {/* Compact view */}
                       {!isExpanded && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {node.items.slice(0, 3).map((item, i) => (
-                            <span key={i} className="text-[10px] bg-surface-2 text-slate-400 px-2 py-0.5 rounded-full">
+                            <span key={i} className="text-[10px] bg-surface-2 text-slate-300 px-2 py-0.5 rounded-full">
                               {item.name}
                               {item.share && <span className="text-blue-400 ml-1">{item.share}</span>}
                             </span>
                           ))}
                           {node.items.length > 3 && (
-                            <span className="text-[10px] text-slate-500 px-1">+{node.items.length - 3}</span>
+                            <span className="text-[10px] text-slate-400 px-1">+{node.items.length - 3}</span>
                           )}
                         </div>
                       )}
@@ -466,7 +422,7 @@ export default function SupplyChainView() {
                               <div>
                                 <p className="text-xs font-medium text-white">{item.name}</p>
                                 {item.detail && (
-                                  <p className="text-[10px] text-slate-500">{item.detail}</p>
+                                  <p className="text-[10px] text-slate-400">{item.detail}</p>
                                 )}
                               </div>
                               {item.share && (
@@ -482,7 +438,7 @@ export default function SupplyChainView() {
               })}
             </div>
 
-            {/* Animated grid connector between layers */}
+            {/* Animated arrow connector between layers */}
             {layerIdx < flowData.length - 1 && (
               <LayerConnector
                 fromColor={supplyChainLayers[layerIdx]?.color || "#3B82F6"}
@@ -521,7 +477,7 @@ export default function SupplyChainView() {
                   {item.risk}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">{item.detail}</p>
+              <p className="text-xs text-slate-300">{item.detail}</p>
             </div>
           ))}
         </div>

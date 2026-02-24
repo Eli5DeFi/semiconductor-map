@@ -962,7 +962,12 @@ export const companies: Company[] = [
   },
 ];
 
-// ── Logo URL helper ─────────────────────────────────────────────────
+// ── Logo path helper ────────────────────────────────────────────────
+export function getCompanyLogoPath(companyId: string): string {
+  return `/logos/${companyId}.svg`;
+}
+
+/** @deprecated Use getCompanyLogoPath instead */
 export function getCompanyLogoUrl(website: string): string {
   try {
     const domain = new URL(website).hostname.replace("www.", "");

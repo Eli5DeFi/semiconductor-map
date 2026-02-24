@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
@@ -15,7 +15,7 @@ import {
   Building2,
 } from "lucide-react";
 import { productSupplyChains } from "@/data/supplyChain";
-import { companies, categoryColors, categoryLabels, getCompanyLogoUrl, type Company } from "@/data/companies";
+import { companies, categoryColors, categoryLabels, getCompanyLogoPath, type Company } from "@/data/companies";
 import {
   PieChart,
   Pie,
@@ -53,16 +53,20 @@ function extractCompanyName(str: string): string {
   return str.replace(/\s*\(.*?\)\s*/g, "").trim();
 }
 
-// Company detail popup
-function CompanyPopup({ company, onClose }: { company: Company; onClose: () => void }) {
-  const logoUrl = getCompanyLogoUrl(company.website);
+// Company detail popup with viewport-aware positioning
+function CompanyPopup({ company, onClose, position }: { company: Company; onClose: () => void; position: "above" | "below" }) {
+  const logoPath = getCompanyLogoPath(company.id);
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+      initial={{ opacity: 0, scale: 0.9, y: position === "above" ? 10 : -10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 10 }}
-      className="absolute z-50 w-[320px] bg-[#1E293B] border border-slate-600 rounded-xl shadow-2xl p-4"
-      style={{ bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" }}
+      exit={{ opacity: 0, scale: 0.9, y: position === "above" ? 10 : -10 }}
+      className="absolute z-50 w-[320px] bg-surface-2 border border-border rounded-xl shadow-2xl p-4"
+      style={
+        position === "above"
+          ? { bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" }
+          : { top: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" }
+      }
       onClick={(e) => e.stopPropagation()}
     >
       <button
@@ -77,11 +81,7 @@ function CompanyPopup({ company, onClose }: { company: Company; onClose: () => v
           className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: `${company.color}15`, border: `1px solid ${company.color}30` }}
         >
-          {logoUrl ? (
-            <img src={logoUrl} alt={company.name} width={28} height={28} className="company-logo" />
-          ) : (
-            <span style={{ color: company.color, fontWeight: 700 }}>{company.name[0]}</span>
-          )}
+          <img src={logoPath} alt={company.name} width={28} height={28} className="company-logo" />
         </div>
         <div>
           <h4 className="text-sm font-bold text-white">{company.name}</h4>
@@ -104,36 +104,36 @@ function CompanyPopup({ company, onClose }: { company: Company; onClose: () => v
       <div className="grid grid-cols-2 gap-2 mb-3">
         {company.revenue2024 && (
           <div className="bg-surface rounded-lg p-2">
-            <p className="text-[10px] text-slate-500">Revenue</p>
+            <p className="text-[10px] text-slate-400">Revenue</p>
             <p className="text-xs font-bold text-white">{company.revenue2024}</p>
           </div>
         )}
         <div className="bg-surface rounded-lg p-2">
           <div className="flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-slate-500" />
-            <p className="text-[10px] text-slate-500">HQ</p>
+            <MapPin className="w-3 h-3 text-slate-400" />
+            <p className="text-[10px] text-slate-400">HQ</p>
           </div>
           <p className="text-xs font-bold text-white">{company.country}</p>
         </div>
         {company.employees && (
           <div className="bg-surface rounded-lg p-2">
-            <p className="text-[10px] text-slate-500">Employees</p>
+            <p className="text-[10px] text-slate-400">Employees</p>
             <p className="text-xs font-bold text-white">{company.employees}</p>
           </div>
         )}
         {company.stock && (
           <div className="bg-surface rounded-lg p-2">
-            <p className="text-[10px] text-slate-500">Market Cap</p>
+            <p className="text-[10px] text-slate-400">Market Cap</p>
             <p className="text-xs font-bold text-white">{company.stock.marketCap}</p>
           </div>
         )}
       </div>
 
       {company.marketShare && Object.keys(company.marketShare).length > 0 && (
-        <div className="border-t border-slate-700 pt-2 space-y-1.5">
+        <div className="border-t border-border pt-2 space-y-1.5">
           {Object.entries(company.marketShare).slice(0, 3).map(([key, val]) => (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-[10px] text-slate-400 flex-1 truncate">{key}</span>
+              <span className="text-[10px] text-slate-300 flex-1 truncate">{key}</span>
               {typeof val === "number" && (
                 <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
                   <div
@@ -142,7 +142,7 @@ function CompanyPopup({ company, onClose }: { company: Company; onClose: () => v
                   />
                 </div>
               )}
-              <span className="text-[10px] text-slate-300 w-10 text-right font-semibold">
+              <span className="text-[10px] text-slate-200 w-10 text-right font-semibold">
                 {typeof val === "number" ? `${val}%` : val}
               </span>
             </div>
@@ -162,19 +162,31 @@ function CompanyPopup({ company, onClose }: { company: Company; onClose: () => v
   );
 }
 
-// Clickable company chip that shows popup
+// Clickable company chip with viewport-aware popup
 function CompanyChip({ name }: { name: string }) {
   const [showPopup, setShowPopup] = useState(false);
+  const [popupPos, setPopupPos] = useState<"above" | "below">("below");
+  const chipRef = useRef<HTMLDivElement>(null);
   const companyName = extractCompanyName(name);
   const matchedCompany = findCompany(companyName);
 
+  useEffect(() => {
+    if (showPopup && chipRef.current) {
+      const rect = chipRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      // Popup is ~350px tall. Prefer below unless no space
+      setPopupPos(spaceBelow >= 360 ? "below" : spaceAbove >= 360 ? "above" : "below");
+    }
+  }, [showPopup]);
+
   return (
-    <div className="relative inline-block">
+    <div ref={chipRef} className="relative inline-block">
       <span
         className={`text-[11px] px-2 py-0.5 rounded-full border transition-all ${
           matchedCompany
             ? "bg-surface text-slate-200 border-border hover:border-blue-500/50 hover:bg-blue-500/10 cursor-pointer"
-            : "bg-surface text-slate-300 border-border"
+            : "bg-surface text-slate-200 border-border"
         }`}
         onClick={(e) => {
           if (matchedCompany) {
@@ -190,66 +202,37 @@ function CompanyChip({ name }: { name: string }) {
       </span>
       <AnimatePresence>
         {showPopup && matchedCompany && (
-          <CompanyPopup company={matchedCompany} onClose={() => setShowPopup(false)} />
+          <CompanyPopup company={matchedCompany} onClose={() => setShowPopup(false)} position={popupPos} />
         )}
       </AnimatePresence>
     </div>
   );
 }
 
-// Animated connector between supply chain layers
+// Smooth animated connector between product supply chain layers
 function ProductLayerConnector({ color, index }: { color: string; index: number }) {
   return (
-    <div className="flex justify-center py-1">
-      <svg width="120" height="28" className="overflow-visible">
-        {/* Central flow line */}
-        <line
-          x1="60"
-          y1="0"
-          x2="60"
-          y2="28"
-          className="supply-grid-line"
-          stroke={color}
-          strokeWidth="2"
-          strokeOpacity="0.5"
-        />
-        {/* Left branch */}
-        <line
-          x1="30"
-          y1="4"
-          x2="60"
-          y2="14"
-          className="supply-grid-line"
-          stroke={color}
-          strokeWidth="1"
-          strokeOpacity="0.3"
-          style={{ animationDelay: "0.3s" }}
-        />
-        {/* Right branch */}
-        <line
-          x1="90"
-          y1="4"
-          x2="60"
-          y2="14"
-          className="supply-grid-line"
-          stroke={color}
-          strokeWidth="1"
-          strokeOpacity="0.3"
-          style={{ animationDelay: "0.6s" }}
-        />
-        {/* Center node */}
-        <circle cx="60" cy="14" r="2.5" fill={color} opacity="0.6">
-          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite" begin={`${index * 0.2}s`} />
-          <animate attributeName="r" values="2;3.5;2" dur="2s" repeatCount="indefinite" begin={`${index * 0.2}s`} />
-        </circle>
-      </svg>
+    <div className="flex justify-center py-2">
+      <div className="flex flex-col items-center gap-0">
+        <div
+          className="connector-line rounded-full"
+          style={{
+            height: 24,
+            ["--connector-from" as string]: color,
+            ["--connector-to" as string]: color,
+          }}
+        >
+          <div className="connector-particle" style={{ background: color, animationDelay: `${index * 0.3}s` }} />
+        </div>
+        <div className="connector-arrowhead" style={{ borderTopColor: color, opacity: 0.6 }} />
+      </div>
     </div>
   );
 }
 
 export default function ProductView({ productId }: ProductViewProps) {
   const product = productSupplyChains.find((p) => p.id === productId);
-  if (!product) return <div className="p-8 text-slate-400">Product not found</div>;
+  if (!product) return <div className="p-8 text-slate-300">Product not found</div>;
 
   const Icon = iconMap[product.icon] || Cpu;
   const chartData = product.keyPlayers.map((p) => ({
@@ -271,7 +254,7 @@ export default function ProductView({ productId }: ProductViewProps) {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white">{product.name}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{product.description}</p>
+          <p className="text-xs text-slate-300 mt-0.5">{product.description}</p>
           <span className="text-xs font-semibold text-emerald-400">Market Size: {product.marketSize}</span>
         </div>
       </motion.div>
@@ -319,10 +302,10 @@ export default function ProductView({ productId }: ProductViewProps) {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "#1e293b",
-                    border: "1px solid #334155",
+                    background: "var(--color-surface-2)",
+                    border: "1px solid var(--color-border)",
                     borderRadius: "8px",
-                    color: "#e2e8f0",
+                    color: "var(--color-foreground)",
                     fontSize: "12px",
                   }}
                   formatter={(value) => [`${value}%`, "Share"]}
@@ -337,9 +320,9 @@ export default function ProductView({ productId }: ProductViewProps) {
                 <div key={item.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-sm text-slate-300">{item.name}</span>
+                    <span className="text-sm text-slate-200">{item.name}</span>
                     {matched && (
-                      <span className="text-[9px] text-slate-500 font-mono">{matched.ticker}</span>
+                      <span className="text-[9px] text-slate-400 font-mono">{matched.ticker}</span>
                     )}
                   </div>
                   <span className="text-sm font-semibold text-white">{item.value}%</span>
@@ -359,7 +342,7 @@ export default function ProductView({ productId }: ProductViewProps) {
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
             <Factory className="w-4 h-4 text-blue-400 icon-high-contrast" />
             Supply Chain Layers
-            <span className="text-[10px] text-slate-500 ml-auto">Click company names for details</span>
+            <span className="text-[10px] text-slate-400 ml-auto">Click company names for details</span>
           </h3>
           <div className="space-y-0">
             {product.layers.map((layer, idx) => (
@@ -370,7 +353,7 @@ export default function ProductView({ productId }: ProductViewProps) {
                   transition={{ delay: 0.1 + idx * 0.08 }}
                   className="flex items-start gap-3 p-3 rounded-lg border supply-node-active"
                   style={{
-                    backgroundColor: `color-mix(in srgb, ${COLORS[idx % COLORS.length]} 4%, #1e293b)`,
+                    backgroundColor: `color-mix(in srgb, ${COLORS[idx % COLORS.length]} 4%, var(--color-surface-2))`,
                     borderColor: `${COLORS[idx % COLORS.length]}15`,
                   }}
                 >
@@ -439,7 +422,7 @@ export default function ProductView({ productId }: ProductViewProps) {
                       {bn.severity}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">{bn.description}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{bn.description}</p>
                 </div>
               );
             })}
