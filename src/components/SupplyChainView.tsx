@@ -266,17 +266,17 @@ function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: delay * 0.1, duration: 0.5 }}
-      className="relative flex items-center justify-center my-1 py-2"
+      className="relative flex items-center justify-center my-4 py-4"
     >
       {/* Central animated line */}
       <div className="absolute inset-x-4 flex items-center justify-center">
-        <svg width="100%" height="32" className="overflow-visible">
+        <svg width="100%" height="48" className="overflow-visible">
           {/* Horizontal grid line */}
           <line
             x1="10%"
-            y1="16"
+            y1="24"
             x2="90%"
-            y2="16"
+            y2="24"
             stroke={`${fromColor}30`}
             strokeWidth="1"
           />
@@ -285,7 +285,7 @@ function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; 
             x1="50%"
             y1="0"
             x2="50%"
-            y2="32"
+            y2="48"
             className="supply-grid-line"
             stroke="url(#connectorGradient)"
             strokeWidth="2"
@@ -295,10 +295,10 @@ function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; 
             x1="20%"
             y1="4"
             x2="50%"
-            y2="16"
+            y2="24"
             className="supply-grid-line"
-            stroke={`${fromColor}40`}
-            strokeWidth="1"
+            stroke={`${fromColor}50`}
+            strokeWidth="1.5"
             style={{ animationDelay: "0.3s" }}
           />
           {/* Right branch */}
@@ -306,38 +306,38 @@ function LayerConnector({ fromColor, toColor, delay = 0 }: { fromColor: string; 
             x1="80%"
             y1="4"
             x2="50%"
-            y2="16"
+            y2="24"
             className="supply-grid-line"
-            stroke={`${fromColor}40`}
-            strokeWidth="1"
+            stroke={`${fromColor}50`}
+            strokeWidth="1.5"
             style={{ animationDelay: "0.6s" }}
           />
           {/* Left exit */}
           <line
             x1="50%"
-            y1="16"
+            y1="24"
             x2="25%"
-            y2="28"
+            y2="44"
             className="supply-grid-line"
-            stroke={`${toColor}40`}
-            strokeWidth="1"
+            stroke={`${toColor}50`}
+            strokeWidth="1.5"
             style={{ animationDelay: "0.9s" }}
           />
           {/* Right exit */}
           <line
             x1="50%"
-            y1="16"
+            y1="24"
             x2="75%"
-            y2="28"
+            y2="44"
             className="supply-grid-line"
-            stroke={`${toColor}40`}
-            strokeWidth="1"
+            stroke={`${toColor}50`}
+            strokeWidth="1.5"
             style={{ animationDelay: "1.2s" }}
           />
           {/* Node dots */}
-          <circle cx="50%" cy="16" r="3" fill={fromColor} opacity="0.7">
+          <circle cx="50%" cy="24" r="4" fill={fromColor} opacity="0.7">
             <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite" />
-            <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" />
+            <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
           </circle>
           {/* Gradient definition */}
           <defs>
